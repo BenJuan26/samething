@@ -1,0 +1,143 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/gorilla/websocket"
+)
+
+type clientMessage struct {
+	Player int64 `json:"player"`
+	Word string `json:"word"`
+}
+
+type gameState struct {
+	State int64 `json:"state"`
+	Words []string `json:"words"`
+	Waitings []bool `json:"waitings"`
+}
+
+var state gameState
+
+const (
+	STARTED = 0
+	WAITING = 1
+	READY   = 2
+	MATCHED = 3
+)
+
+func init() {
+	state = gameState{
+		State: STARTED,
+		Words: make([]string, 2),
+		Waitings: make([]bool, 2),
+	}
+
+	state.Waitings[0] = true
+	state.Waitings[1] = true
+
+	clients = make([]*websocket.Conn, 0)
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func (r *http.Request) bool {
+		return true;
+	},
+}
+
+var clients []*websocket.Conn
+
+func otherPlayer(i int64) int64 {
+	if i == 0 {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+func main() {
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil) // error ignored for sake of simplicity
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Printf("Old length: %d\n", len(clients))
+		clients = append(clients, conn)
+		fmt.Printf("New length: %d\n", len(clients))
+
+		for {
+			var msg clientMessage
+			// Read message from browser
+			err := conn.ReadJSON(&msg)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// Print the message to the console
+			fmt.Printf("%s(Player %d) sent: %s\n", conn.RemoteAddr(), msg.Player, msg.Word)
+
+			state.Words[msg.Player] = msg.Word
+			state.Waitings[msg.Player] = false
+
+			if state.State != STARTED {
+				state.State = WAITING
+			}
+			done := true
+			for _, wait := range(state.Waitings) {
+				if wait {
+					done = false
+				}
+			}
+			if done {
+				fmt.Println("Received both answers")
+				if strings.ToLower(state.Words[0]) == strings.ToLower(state.Words[1]) {
+					fmt.Println("Match!")
+					state.State = MATCHED
+				} else {
+					fmt.Println("No match")
+					state.State = READY
+				}
+				for i, _ := range(state.Waitings) {
+					state.Waitings[i] = true
+				}
+			}
+			// Write message back to browser
+			for i, client := range(clients) {
+				fmt.Printf("Client %d\n", i)
+				if done {
+					fmt.Println("Sending state")
+					err := client.WriteJSON(state)
+					if err != nil {
+						fmt.Println(err)
+					}
+				} else {
+					privState := gameState{
+						State: state.State,
+						Words: make([]string, 2),
+						Waitings: make([]bool, 2),
+					}
+					privState.Waitings[i] = state.Waitings[i]
+					fmt.Println("Sending state")
+					err := client.WriteJSON(privState)
+					if err != nil {
+						fmt.Println(err)
+					}
+				}
+			}
+		}
+	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "index.html")
+	})
+
+	http.ListenAndServe(":8080", nil)
+}
+
