@@ -2,69 +2,42 @@
 <html>
 <head>
 <title>Same Thing</title>
+<style>
+#content {
+    width: 800px;
+    margin: 0 auto;
+    text-align: left;
+}
+body {
+    text-align: center;
+}
+</style>
 </head>
 <body>
-<p id="server-msg"></p>
-<p id="player1-word"></p>
-<p id="player2-word"></p>
-<input id="word" type="text" />
-<label>Player</label><select id="player"><option value="0">1</option><option value="1">2</option></select>
-<button onclick="send()">Send</button>
-<script>
-	var input = document.getElementById("word");
-	var word1 = document.getElementById("player1-word");
-    var word2 = document.getElementById("player2-word");
-    var player = document.getElementById("player");
-    var serverMsg = document.getElementById("server-msg");
-
-    var STARTED = 0;
-    var WAITING = 1;
-    var READY   = 2;
-    var MATCHED = 3;
-
-	var socket = new WebSocket("wss://benjuan26.com/samething/ws");
-
-	socket.onopen = function () {
-	};
-
-    function otherplayer() {
-        if (player.selectedIndex == 0) {
-            return 1;
-        } else {
-            return 0;
+    <div id="content">
+        <h3>Same Thing!</h3>
+        <button onclick="newGame()">New Game</button><br/>
+        <input type="text"/><button onclick="joinGame()">Join Game</button>
+    </div>
+<script type="text/javascript">
+function newGame() {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var body = JSON.parse(this.responseText);
+            var newUrl = body.redirect_url;
+            window.location.href = newUrl;
+        } else if (this.readyState == 4) {
+            console.log(this.responseText);
         }
-    };
+    }
+    xhr.open("POST", "https://benjuan26.com/samething/game");
+    xhr.send();
+}
 
-	socket.onmessage = function (e) {
-        var data = JSON.parse(e.data);
-        console.log("Got data from server: " + e.data);
-        if (data.state == STARTED && data.waitings[player.selectedIndex]) {
-            serverMsg.innerHTML = "Enter a word. Any word.";
-        } else if (data.state == STARTED) {
-            serverMsg.innerHTML = "Waiting on other player...";
-        } else if (data.state == WAITING && data.waitings[player.selectedIndex]) {
-            serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
-        } else if (data.state == WAITING) {
-            serverMsg.innerHTML = "Waiting on other player...";
-        } else if (data.state == READY) {
-            word1.innerHTML = data.words[0];
-            word2.innerHTML = data.words[1];
-            serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
-        } else {
-            word1.innerHTML = data.words[0];
-            word2.innerHTML = data.words[1];
-            serverMsg.innerHTML = "It's a match! Congratulations!";
-        }
-	};
+function joinGame() {
 
-	function send() {
-        var currPlayer = player.selectedIndex;
-        var data = {
-            player: currPlayer,
-            word: input.value
-        };
-		socket.send(JSON.stringify(data));
-	};
+}
 </script>
 </body>
 </html>

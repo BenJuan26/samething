@@ -1,14 +1,14 @@
 package game
 
 type Player struct {
-	Name    string
-	Word    string
-	Waiting bool
+	Name    string `json:"name"`
+	Word    string `json:"word"`
+	Waiting bool   `json:"waiting"`
 }
 
 type State struct {
-	ID      string
-	State   int64
-	Player1 Player
-	Player2 Player
+	ID      string `json:"id"`
+	State   int64  `json:"state"`
+	Player1 Player `json:"player1"`
+	Player2 Player `json:"player2"`
 }
