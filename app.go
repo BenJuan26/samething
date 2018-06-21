@@ -25,11 +25,11 @@ type clientMessage struct {
 
 var clients = make([]Client, 0)
 var upgrader = websocket.Upgrader{
-    ReadBufferSize:  1024,
-    WriteBufferSize: 1024,
-    CheckOrigin: func (r *http.Request) bool {
-        return true;
-    },
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 var statesChan = make(chan game.State)
@@ -68,11 +68,11 @@ func notify() {
 				}
 			}
 
-		    err := client.Conn.WriteJSON(privState)
-            if err != nil {
-                fmt.Println(err)
+			err := client.Conn.WriteJSON(privState)
+			if err != nil {
+				fmt.Println(err)
 				deleted = append(deleted, i)
-            }
+			}
 			fmt.Printf("Updated %s\n", client.Conn.RemoteAddr())
 		}
 
@@ -89,16 +89,16 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	gameID := query["game"][0]
 	name := query["name"][0]
 	conn, err := upgrader.Upgrade(w, r, nil)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer conn.Close()
 
 	clients = append(clients, Client{
-		GameID: gameID,
+		GameID:     gameID,
 		PlayerName: name,
-		Conn: conn,
+		Conn:       conn,
 	})
 
 	initialState, err := db.GetGameState(gameID)
@@ -110,11 +110,11 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 
 	for {
 		var msg clientMessage
-        err := conn.ReadJSON(&msg)
-        if err != nil {
-            fmt.Println(err)
-            return
-        }
+		err := conn.ReadJSON(&msg)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		fmt.Printf("Addr: %s; Game: %s; Player: %s; Word: %s;\n", conn.RemoteAddr(), gameID, name, msg.Word)
 		state, err := db.GetGameState(gameID)
@@ -164,7 +164,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Println("Updated game "+state.ID+" to database")
+		fmt.Println("Updated game " + state.ID + " to database")
 
 		statesChan <- state
 	}
@@ -189,4 +189,3 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 	data["game"] = vars["id"]
 	gamePage.Execute(w, data)
 }
-

@@ -57,7 +57,7 @@ func NewGameState() (string, error) {
 	}
 	_, err := db.Exec("INSERT INTO game VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		id, 0, "", "", "", "", true, true)
-	fmt.Println("New game, id "+id)
+	fmt.Println("New game, id " + id)
 	return id, err
 }
 
@@ -83,9 +83,9 @@ func UpdateGameState(s game.State) error {
 }
 
 func generateGameID() string {
-    id := make([]byte, 4)
-    for i := range id {
-        id[i] = letters[rand.Intn(len(letters))]
-    }
-    return string(id)
+	id := make([]byte, 4)
+	for i := range id {
+		id[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(id)
 }

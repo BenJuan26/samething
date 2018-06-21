@@ -1,10 +1,10 @@
 package game
 
 const (
-    STARTED = 0
-    WAITING = 1
-    READY   = 2
-    MATCHED = 3
+	STARTED = 0
+	WAITING = 1
+	READY   = 2
+	MATCHED = 3
 )
 
 type Player struct {
