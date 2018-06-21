@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
@@ -28,8 +29,9 @@ func init() {
 
 func GetGameState(id string) (game.State, error) {
 	var s game.State
+	var timestamp string
 	row := db.QueryRow("SELECT * FROM game WHERE id = '" + id + "'")
-	err := row.Scan(&s.ID, &s.State, &s.Player1.Name, &s.Player2.Name, &s.Player1.Word, &s.Player2.Word, &s.Player1.Waiting, &s.Player2.Waiting)
+	err := row.Scan(&s.ID, &s.State, &s.Player1.Name, &s.Player2.Name, &s.Player1.Word, &s.Player2.Word, &s.Player1.Waiting, &s.Player2.Waiting, &timestamp)
 	if err != nil {
 		return s, err
 	}
@@ -60,6 +62,9 @@ func NewGameState() (string, error) {
 }
 
 func UpdateGameState(s game.State) error {
+	fmt.Println("Updating game state to db:")
+	jsonBytes, _ := json.Marshal(s)
+	fmt.Println(string(jsonBytes))
 	result, err := db.Exec("UPDATE game SET (state, name1, name2, word1, word2, waiting1, waiting2) = ($1, $2, $3, $4, $5, $6, $7) WHERE id = $8", s.State, s.Player1.Name, s.Player2.Name, s.Player1.Word, s.Player2.Word, s.Player1.Waiting, s.Player2.Waiting, s.ID)
 	if err != nil {
 		return err

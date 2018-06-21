@@ -17,9 +17,16 @@ body {
     <div id="content">
         <h3>Same Thing!</h3>
         <button onclick="newGame()">New Game</button><br/>
-        <input type="text"/><button onclick="joinGame()">Join Game</button>
+        <input id="game-input" type="text"/><button onclick="joinGame()">Join Game</button>
     </div>
 <script type="text/javascript">
+var gameInput = document.getElementById("game-input");
+gameInput.addEventListener("keyup", function(event){
+    if (event.keyCode === 13) {
+        joinGame();
+    }
+});
+
 function newGame() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
@@ -36,7 +43,7 @@ function newGame() {
 }
 
 function joinGame() {
-
+    window.location.href = "https://benjuan26.com/samething/game/" + gameInput.value;
 }
 </script>
 </body>

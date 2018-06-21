@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Same Thing ({{ .game }})</title>
+<style>
+#content {
+    width: 800px;
+    margin: 0 auto;
+    text-align: left;
+}
+body {
+    text-align: center;
+}
+.modal {
+    display: block;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+</style>
+</head>
+<body>
+<div id="name-modal" class="modal">
+<div class="modal-content">
+<label>Enter name</label><input id="name-input" /><button onclick="openConnection()">Submit</button>
+</div>
+</div>
+<div id="content">
+<p id="server-msg"></p>
+<p id="player1-word"></p>
+<p id="player2-word"></p>
+<input id="word" type="text" />
+<button onclick="send()">Send</button>
+</div>
+<script>
+    var modal = document.getElementById("name-modal");
+	var input = document.getElementById("word");
+	var word1 = document.getElementById("player1-word");
+    var word2 = document.getElementById("player2-word");
+    var player = document.getElementById("player");
+    var serverMsg = document.getElementById("server-msg");
+    var nameInput = document.getElementById("name-input");
+
+    var STARTED = 0;
+    var WAITING = 1;
+    var READY   = 2;
+    var MATCHED = 3;
+
+    var socket;
+    var name;
+
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            send();
+        }
+    });
+
+    nameInput.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            openConnection();
+        }
+    });
+    
+    function openConnection() {
+        name = nameInput.value;
+        socket = new WebSocket("wss://benjuan26.com/samething/ws?game={{ .game }}&name="+name);
+
+        socket.onopen = function () {
+        };
+
+        socket.onmessage = function (e) {
+            var data = JSON.parse(e.data);
+            console.log("Got data from server: " + e.data);
+            if (data.state == STARTED) {
+                if (data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting) {
+                    serverMsg.innerHTML = "Enter a word. Any word.";
+                } else {
+                    serverMsg.innerHTML = "Waiting on other player...";
+                }
+            } else if (data.state == WAITING) {
+                if (data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting) {
+                    serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
+                } else {
+                    serverMsg.innerHTML = "Waiting on other player...";
+                }
+            } else if (data.state == READY) {
+                word1.innerHTML = data.player1.word;
+                word2.innerHTML = data.player2.word;
+                serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
+            } else {
+                word1.innerHTML = data.player1.word;
+                word2.innerHTML = data.player2.word;
+                serverMsg.innerHTML = "It's a match! Congratulations!";
+            }
+        };
+
+        modal.style.display = "none";
+    }
+
+	function send() {
+        if (!socket) {
+            return;
+        }
+        var data = {
+            word: input.value
+        };
+		socket.send(JSON.stringify(data));
+	};
+</script>
+</body>
+</html>

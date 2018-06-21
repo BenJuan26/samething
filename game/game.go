@@ -1,5 +1,12 @@
 package game
 
+const (
+    STARTED = 0
+    WAITING = 1
+    READY   = 2
+    MATCHED = 3
+)
+
 type Player struct {
 	Name    string `json:"name"`
 	Word    string `json:"word"`
