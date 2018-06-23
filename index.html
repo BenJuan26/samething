@@ -3,10 +3,33 @@
 <head>
 <title>Same Thing</title>
 <style>
+body {
+    padding: 0;
+    margin: 0;
+}
+#title-heading {
+    margin-top: 0;
+}
+/*
+.big-action {
+    background-color: #b2a03f;
+    border: none;
+    color: #47347a;
+    padding: 1em 2em;
+    margin: 0.5em;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+*/
 #content {
     width: 800px;
     margin: 0 auto;
-    text-align: left;
+    padding: 0.5em;			
+    text-align: center;
+    /* background-color: #fff4be; */
+    color: #47347a;
+    font-size: 16pt;
 }
 body {
     text-align: center;
@@ -15,9 +38,9 @@ body {
 </head>
 <body>
     <div id="content">
-        <h3>Same Thing!</h3>
-        <button onclick="newGame()">New Game</button><br/>
-        <input id="game-input" type="text"/><button onclick="joinGame()">Join Game</button>
+        <h3 id="title-heading">Same Thing!</h3>
+        <button onclick="newGame()" class="big-action">New Game</button><br/>
+        <input id="game-input" type="text"/><button onclick="joinGame()" class="big-action">Join Game</button>
     </div>
 <script type="text/javascript">
 var gameInput = document.getElementById("game-input");
@@ -43,7 +66,21 @@ function newGame() {
 }
 
 function joinGame() {
-    window.location.href = "https://benjuan26.com/samething/game/" + gameInput.value;
+    var gameID = gameInput.value;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var body = JSON.parse(this.responseText);
+            var newUrl = body.redirect_url;
+            window.location.href = newUrl;
+        } else if (this.readyState == 4 && this.status == 404) {
+            alert("Game " + gameID + "  doesn't exist");
+        } else if (this.readyState == 4) {
+            alert("Couldn't join game.");
+        }
+    }
+    xhr.open("POST", "https://benjuan26.com/samething/game/" + gameID + "/check");
+    xhr.send();
 }
 </script>
 </body>

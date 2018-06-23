@@ -41,6 +41,7 @@ func main() {
 	}))
 	router.HandleFunc("/game", newGame).Methods("POST")
 	router.HandleFunc("/game/{id}", serveGame)
+	router.HandleFunc("/game/{id}/check", checkGame);
 	router.HandleFunc("/ws", handleWebsocket)
 
 	go notify()
@@ -179,6 +180,17 @@ func newGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, `{"redirect_url": "https://benjuan26.com/samething/game/%s"}`, id)
+}
+
+func checkGame(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	gameID := vars["id"]
+	if (!db.GameExists(gameID)) {
+		w.WriteHeader(404)
+		return
+	}
+
+	fmt.Fprintf(w, `{"redirect_url":"https://benjuan26.com/samething/game/%s"}`, gameID)
 }
 
 func serveGame(w http.ResponseWriter, r *http.Request) {

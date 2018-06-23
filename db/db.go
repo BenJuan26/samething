@@ -39,6 +39,21 @@ func GetGameState(id string) (game.State, error) {
 	return s, nil
 }
 
+func GameExists(gameID string) bool {
+	row := db.QueryRow("SELECT COUNT(*) FROM game WHERE id = $1", gameID)
+	var count int64
+	err := row.Scan(&count)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+	if count == 1 {
+		return true
+	}
+
+	return false
+}
+
 func NewGameState() (string, error) {
 	valid := false
 	var id string

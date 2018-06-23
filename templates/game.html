@@ -47,6 +47,11 @@ body {
 <button onclick="send()">Send</button>
 </div>
 <script>
+    const MESSAGE_ENTER_WORD = "Enter a word. Any word.";
+    const MESSAGE_WAITING_OTHER_PLAYER = "Waiting on other player...";
+    const MESSAGE_NO_MATCH = "No match yet! Enter something in between the two words.";
+    const MESSAGE_MATCH = "It's a match! Congratulations!";
+
     var modal = document.getElementById("name-modal");
 	var input = document.getElementById("word");
 	var word1 = document.getElementById("player1-word");
@@ -79,36 +84,43 @@ body {
         name = nameInput.value;
         socket = new WebSocket("wss://benjuan26.com/samething/ws?game={{ .game }}&name="+name);
 
-        socket.onopen = function () {
-        };
+        socket.onopen = function() {};
 
         socket.onmessage = function (e) {
             var data = JSON.parse(e.data);
-            console.log("Got data from server: " + e.data);
+            // console.log("Got data from server: " + e.data);
             if (data.state == STARTED) {
-                if (data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting) {
-                    serverMsg.innerHTML = "Enter a word. Any word.";
+                if (waitingForInput(data)) {
+                    serverMsg.innerHTML = MESSAGE_ENTER_WORD;
                 } else {
-                    serverMsg.innerHTML = "Waiting on other player...";
+                    serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
                 }
             } else if (data.state == WAITING) {
-                if (data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting) {
-                    serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
+                if (waitingForInput(data)) {
+                    serverMsg.innerHTML = MESSAGE_NO_MATCH;
                 } else {
-                    serverMsg.innerHTML = "Waiting on other player...";
+                    serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
                 }
             } else if (data.state == READY) {
+                input.disabled = false;
+                input.value = "";
                 word1.innerHTML = data.player1.word;
                 word2.innerHTML = data.player2.word;
-                serverMsg.innerHTML = "No match yet! Enter something in between the two words.";
+                serverMsg.innerHTML = MESSAGE_NO_MATCH;
             } else {
+                input.disabled = false;
+                input.value = "";
                 word1.innerHTML = data.player1.word;
                 word2.innerHTML = data.player2.word;
-                serverMsg.innerHTML = "It's a match! Congratulations!";
+                serverMsg.innerHTML = MESSAGE_MATCH;
             }
         };
 
         modal.style.display = "none";
+    }
+
+    function waitingForInput(data) {
+        return data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting;
     }
 
 	function send() {
@@ -119,6 +131,7 @@ body {
             word: input.value
         };
 		socket.send(JSON.stringify(data));
+        input.disabled = true;
 	};
 </script>
 </body>
