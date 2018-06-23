@@ -117,6 +117,7 @@ body {
         };
 
         modal.style.display = "none";
+        input.focus();
     }
 
     function waitingForInput(data) {
@@ -133,6 +134,8 @@ body {
 		socket.send(JSON.stringify(data));
         input.disabled = true;
 	};
+
+    nameInput.focus();
 </script>
 </body>
 </html>
