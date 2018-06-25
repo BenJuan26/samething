@@ -17,6 +17,7 @@ type config struct {
 
 var configData *config
 
+// TODO: Allow for a cmdline flag specifying the config file path
 func init() {
 	loadConfig("config.json")
 }

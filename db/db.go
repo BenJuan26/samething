@@ -60,6 +60,7 @@ func NewGameState() (string, error) {
 	for !valid {
 		id = generateGameID()
 		row := db.QueryRow("SELECT COUNT(*) FROM game WHERE id = $1", id)
+
 		var count int64
 		err := row.Scan(&count)
 		if err != nil {
@@ -70,6 +71,8 @@ func NewGameState() (string, error) {
 			valid = true
 		}
 	}
+
+	// Last column is left blank to default to current_time
 	_, err := db.Exec("INSERT INTO game VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		id, 0, "", "", "", "", true, true)
 	fmt.Println("New game, id " + id)
@@ -77,9 +80,7 @@ func NewGameState() (string, error) {
 }
 
 func UpdateGameState(s game.State) error {
-	fmt.Println("Updating game state to db:")
 	jsonBytes, _ := json.Marshal(s)
-	fmt.Println(string(jsonBytes))
 	result, err := db.Exec("UPDATE game SET (state, name1, name2, word1, word2, waiting1, waiting2) = ($1, $2, $3, $4, $5, $6, $7) WHERE id = $8", s.State, s.Player1.Name, s.Player2.Name, s.Player1.Word, s.Player2.Word, s.Player1.Waiting, s.Player2.Waiting, s.ID)
 	if err != nil {
 		return err

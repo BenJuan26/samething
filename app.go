@@ -14,6 +14,11 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// The idea here is to associate each websocket with a player and a game.
+// That will allow the player to reconnect if they've closed their browser
+// window or lost their connection. Multiple websockets for the same user
+// is allowed in case an old websocket is still hanging around. This is the
+// most simple way to do this without some kind of login system.
 type Client struct {
 	GameID     string
 	PlayerName string
@@ -117,6 +122,7 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 	}
 	statesChan <- initialState
 
+	// Listen for new websocket messages forever (or until an error occurs)
 	for {
 		var msg clientMessage
 		err := conn.ReadJSON(&msg)
@@ -134,7 +140,8 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 		jsonBytes, _ := json.Marshal(state)
 		fmt.Println(string(jsonBytes))
 
-		// First run
+		// Set the current player to the first non-empty player.
+		// More than two players is an error.
 		if state.Player1.Name == "" {
 			state.Player1.Name = name
 		} else if state.Player2.Name == "" && state.Player1.Name != name {
@@ -173,8 +180,8 @@ func handleWebsocket(w http.ResponseWriter, r *http.Request) {
 			fmt.Println(err)
 			continue
 		}
-		fmt.Println("Updated game " + state.ID + " to database")
 
+		// Tell the notifier to update the clients about the new game state
 		statesChan <- state
 	}
 }
