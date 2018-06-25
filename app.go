@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/BenJuan26/samething/config"
 	"github.com/BenJuan26/samething/db"
 	"github.com/BenJuan26/samething/game"
 	"github.com/gorilla/mux"
@@ -36,17 +37,25 @@ var statesChan = make(chan game.State)
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
-	}))
+	router.HandleFunc("/", serveIndex)
 	router.HandleFunc("/game", newGame).Methods("POST")
 	router.HandleFunc("/game/{id}", serveGame)
-	router.HandleFunc("/game/{id}/check", checkGame);
+	router.HandleFunc("/game/{id}/check", checkGame)
 	router.HandleFunc("/ws", handleWebsocket)
 
 	go notify()
 
 	http.ListenAndServe(":8080", router)
+}
+
+func serveIndex(w http.ResponseWriter, r *http.Request) {
+	indexPage := template.Must(template.ParseFiles("templates/index.html"))
+
+	data := make(map[string]interface{})
+	data["base_url"] = config.GetBaseURL()
+	data["schema"] = config.GetSchema()
+	data["title"] = config.GetTitle()
+	indexPage.Execute(w, data)
 }
 
 func notify() {
@@ -185,7 +194,7 @@ func newGame(w http.ResponseWriter, r *http.Request) {
 func checkGame(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	gameID := vars["id"]
-	if (!db.GameExists(gameID)) {
+	if !db.GameExists(gameID) {
 		w.WriteHeader(404)
 		return
 	}
@@ -199,5 +208,6 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 
 	data := make(map[string]interface{})
 	data["game"] = vars["id"]
+	data["base_url"] = config.GetBaseURL()
 	gamePage.Execute(w, data)
 }

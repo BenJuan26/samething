@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Same Thing</title>
+        <title>{{ .title }}</title>
 <style>
 body {
     padding: 0;
@@ -38,7 +38,7 @@ body {
 </head>
 <body>
     <div id="content">
-        <h3 id="title-heading">Same Thing!</h3>
+        <h3 id="title-heading">{{ .title }}</h3>
         <button onclick="newGame()" class="big-action">New Game</button><br/>
         <input id="game-input" type="text"/><button onclick="joinGame()" class="big-action">Join Game</button>
     </div>
@@ -61,7 +61,7 @@ function newGame() {
             console.log(this.responseText);
         }
     }
-    xhr.open("POST", "https://benjuan26.com/samething/game");
+    xhr.open("POST", "{{.schema}}://{{.base_url}}/game");
     xhr.send();
 }
 
@@ -79,7 +79,7 @@ function joinGame() {
             alert("Couldn't join game.");
         }
     }
-    xhr.open("POST", "https://benjuan26.com/samething/game/" + gameID + "/check");
+    xhr.open("POST", "{{.schema}}://{{.base_url}}/game/" + gameID + "/check");
     xhr.send();
 }
 </script>
