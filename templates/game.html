@@ -47,95 +47,95 @@ body {
 <button onclick="send()">Send</button>
 </div>
 <script>
-    const MESSAGE_ENTER_WORD = "Enter a word. Any word.";
-    const MESSAGE_WAITING_OTHER_PLAYER = "Waiting on other player...";
-    const MESSAGE_NO_MATCH = "No match yet! Enter something in between the two words.";
-    const MESSAGE_MATCH = "It's a match! Congratulations!";
+const MESSAGE_ENTER_WORD = "Enter a word. Any word.";
+const MESSAGE_WAITING_OTHER_PLAYER = "Waiting on other player...";
+const MESSAGE_NO_MATCH = "No match yet! Enter something in between the two words.";
+const MESSAGE_MATCH = "It's a match! Congratulations!";
 
-    var modal = document.getElementById("name-modal");
-	var input = document.getElementById("word");
-	var word1 = document.getElementById("player1-word");
-    var word2 = document.getElementById("player2-word");
-    var player = document.getElementById("player");
-    var serverMsg = document.getElementById("server-msg");
-    var nameInput = document.getElementById("name-input");
+var modal = document.getElementById("name-modal");
+var input = document.getElementById("word");
+var word1 = document.getElementById("player1-word");
+var word2 = document.getElementById("player2-word");
+var player = document.getElementById("player");
+var serverMsg = document.getElementById("server-msg");
+var nameInput = document.getElementById("name-input");
 
-    var STARTED = 0;
-    var WAITING = 1;
-    var READY   = 2;
-    var MATCHED = 3;
+var STARTED = 0;
+var WAITING = 1;
+var READY   = 2;
+var MATCHED = 3;
 
-    var socket;
-    var name;
+var socket;
+var name;
 
-    input.addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-            send();
-        }
-    });
+input.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+        send();
+    }
+});
 
-    nameInput.addEventListener("keyup", function(event) {
-        if (event.keyCode === 13) {
-            openConnection();
-        }
-    });
-    
-    function openConnection() {
-        name = nameInput.value;
-        socket = new WebSocket("wss://{{.base_url}}/ws?game={{.game}}&name="+name);
+nameInput.addEventListener("keyup", function(event) {
+    if (event.keyCode === 13) {
+        openConnection();
+    }
+});
 
-        socket.onopen = function() {};
+function openConnection() {
+    name = nameInput.value;
+    socket = new WebSocket("wss://{{.base_url}}/ws?game={{.game}}&name="+name);
 
-        socket.onmessage = function (e) {
-            var data = JSON.parse(e.data);
-            // console.log("Got data from server: " + e.data);
-            if (data.state == STARTED) {
-                if (waitingForInput(data)) {
-                    serverMsg.innerHTML = MESSAGE_ENTER_WORD;
-                } else {
-                    serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
-                }
-            } else if (data.state == WAITING) {
-                if (waitingForInput(data)) {
-                    serverMsg.innerHTML = MESSAGE_NO_MATCH;
-                } else {
-                    serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
-                }
-            } else if (data.state == READY) {
-                input.disabled = false;
-                input.value = "";
-                word1.innerHTML = data.player1.word;
-                word2.innerHTML = data.player2.word;
+    socket.onopen = function() {};
+
+    socket.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+        // console.log("Got data from server: " + e.data);
+        if (data.state == STARTED) {
+            if (waitingForInput(data)) {
+                serverMsg.innerHTML = MESSAGE_ENTER_WORD;
+            } else {
+                serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
+            }
+        } else if (data.state == WAITING) {
+            if (waitingForInput(data)) {
                 serverMsg.innerHTML = MESSAGE_NO_MATCH;
             } else {
-                input.disabled = false;
-                input.value = "";
-                word1.innerHTML = data.player1.word;
-                word2.innerHTML = data.player2.word;
-                serverMsg.innerHTML = MESSAGE_MATCH;
+                serverMsg.innerHTML = MESSAGE_WAITING_OTHER_PLAYER;
             }
-        };
-
-        modal.style.display = "none";
-        input.focus();
-    }
-
-    function waitingForInput(data) {
-        return data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting;
-    }
-
-	function send() {
-        if (!socket) {
-            return;
+        } else if (data.state == READY) {
+            input.disabled = false;
+            input.value = "";
+            word1.innerHTML = data.player1.word;
+            word2.innerHTML = data.player2.word;
+            serverMsg.innerHTML = MESSAGE_NO_MATCH;
+        } else {
+            input.disabled = false;
+            input.value = "";
+            word1.innerHTML = data.player1.word;
+            word2.innerHTML = data.player2.word;
+            serverMsg.innerHTML = MESSAGE_MATCH;
         }
-        var data = {
-            word: input.value
-        };
-		socket.send(JSON.stringify(data));
-        input.disabled = true;
-	};
+    };
 
-    nameInput.focus();
+    modal.style.display = "none";
+    input.focus();
+}
+
+function waitingForInput(data) {
+    return data.player1.name == name && data.player1.waiting || data.player2.name == name && data.player2.waiting;
+}
+
+function send() {
+    if (!socket) {
+        return;
+    }
+    var data = {
+        word: input.value
+    };
+    socket.send(JSON.stringify(data));
+    input.disabled = true;
+};
+
+nameInput.focus();
 </script>
 </body>
 </html>
