@@ -83,7 +83,6 @@ func notify() {
 				fmt.Println(err)
 				deleted = append(deleted, i)
 			}
-			fmt.Printf("Updated %s\n", client.Conn.RemoteAddr())
 		}
 
 		// Remove any clients we can't connect to
