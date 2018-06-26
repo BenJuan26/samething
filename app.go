@@ -57,8 +57,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	indexPage := template.Must(template.ParseFiles("templates/index.html"))
 
 	data := make(map[string]interface{})
-	data["base_url"] = config.GetBaseURL()
-	data["schema"] = config.GetSchema()
+	data["base_url"] = config.GetFullBaseURL()
 	data["title"] = config.GetTitle()
 	indexPage.Execute(w, data)
 }
@@ -194,7 +193,7 @@ func newGame(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Couldn't create game, try again later")
 		return
 	}
-	fmt.Fprintf(w, `{"redirect_url": "https://benjuan26.com/samething/game/%s"}`, id)
+	fmt.Fprintf(w, `{"redirect_url": "%s/game/%s"}`, config.GetFullBaseURL(), id)
 }
 
 func checkGame(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +204,7 @@ func checkGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, `{"redirect_url":"https://benjuan26.com/samething/game/%s"}`, gameID)
+	fmt.Fprintf(w, `{"redirect_url":"%s/game/%s"}`, config.GetFullBaseURL(), gameID)
 }
 
 func serveGame(w http.ResponseWriter, r *http.Request) {

@@ -117,7 +117,7 @@ function newGame() {
             console.log(this.responseText);
         }
     }
-    xhr.open("POST", "{{.schema}}://{{.base_url}}/game");
+    xhr.open("POST", "{{.base_url}}/game");
     xhr.send();
 }
 
@@ -145,7 +145,7 @@ function joinGame() {
             alert("Couldn't join game.");
         }
     }
-    xhr.open("POST", "{{.schema}}://{{.base_url}}/game/" + gameID + "/check");
+    xhr.open("POST", "{{.base_url}}/game/" + gameID + "/check");
     xhr.send();
 }
 </script>
