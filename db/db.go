@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
@@ -80,7 +79,6 @@ func NewGameState() (string, error) {
 }
 
 func UpdateGameState(s game.State) error {
-	jsonBytes, _ := json.Marshal(s)
 	result, err := db.Exec("UPDATE game SET (state, name1, name2, word1, word2, waiting1, waiting2) = ($1, $2, $3, $4, $5, $6, $7) WHERE id = $8", s.State, s.Player1.Name, s.Player2.Name, s.Player1.Word, s.Player2.Word, s.Player1.Waiting, s.Player2.Waiting, s.ID)
 	if err != nil {
 		return err

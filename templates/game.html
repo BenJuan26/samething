@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Same Thing ({{ .game }})</title>
+<title>Same Thing - Game {{ .game }}</title>
 <style>
 #content {
     width: 800px;
@@ -34,18 +34,22 @@ body {
 </style>
 </head>
 <body>
+
 <div id="name-modal" class="modal">
 <div class="modal-content">
 <label>Enter name</label><input id="name-input" /><button onclick="openConnection()">Submit</button>
 </div>
 </div>
+
 <div id="content">
 <p id="server-msg"></p>
 <p id="player1-word"></p>
 <p id="player2-word"></p>
-<input id="word" type="text" />
+<input id="word" type="text" placeholder="Enter word" />
 <button onclick="send()">Send</button>
+<p>Game Code: {{ .game }}</p>
 </div>
+
 <script>
 const MESSAGE_ENTER_WORD = "Enter a word. Any word.";
 const MESSAGE_WAITING_OTHER_PLAYER = "Waiting on other player...";
