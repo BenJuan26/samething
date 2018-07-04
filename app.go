@@ -213,6 +213,7 @@ func serveGame(w http.ResponseWriter, r *http.Request) {
 
 	data := make(map[string]interface{})
 	data["game"] = vars["id"]
+	data["ws_schema"] = config.GetWSSchema()
 	data["base_url"] = config.GetBaseURL()
 	gamePage.Execute(w, data)
 }

@@ -86,7 +86,7 @@ nameInput.addEventListener("keyup", function(event) {
 
 function openConnection() {
     name = nameInput.value;
-    socket = new WebSocket("wss://{{.base_url}}/ws?game={{.game}}&name="+name);
+    socket = new WebSocket("{{.ws_schema}}://{{.base_url}}/ws?game={{.game}}&name="+name);
 
     socket.onopen = function() {};
 

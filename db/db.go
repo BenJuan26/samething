@@ -8,7 +8,7 @@ import (
 
 	"github.com/BenJuan26/samething/config"
 	"github.com/BenJuan26/samething/game"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // Implement Postgres underneath database/sql
 )
 
 var db *sql.DB
@@ -19,7 +19,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 
 	var err error
-	connStr := fmt.Sprintf("user=%s host=/var/run/postgresql dbname=%s sslmode=disable", config.GetUser(), config.GetDBName())
+	connStr := fmt.Sprintf("user=%s host=%s dbname=%s sslmode=disable", config.GetDBUser(), config.GetDBHost(), config.GetDBName())
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		panic("Couldn't connect to db: " + err.Error())

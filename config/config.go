@@ -2,17 +2,20 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 type config struct {
-	User    string `json:"user"`
-	DBName  string `json:"db_name"`
-	Schema  string `json:"schema"`
-	BaseURL string `json:"base_url"`
-	Title   string `json:"title"`
+	DBUser     string `json:"db_user"`
+	DBName     string `json:"db_name"`
+	DBHost     string `json:"db_host"`
+	HTTPSchema string `json:"http_schema"`
+	WSSchema   string `json:"ws_schema"`
+	BaseURL    string `json:"base_url"`
+	Title      string `json:"title"`
 }
 
 var configData *config
@@ -41,16 +44,20 @@ func loadConfig(path string) {
 	}
 }
 
-func GetUser() string {
-	return configData.User
+func GetDBUser() string {
+	return configData.DBUser
 }
 
 func GetDBName() string {
 	return configData.DBName
 }
 
-func GetSchema() string {
-	return configData.Schema
+func GetHTTPSchema() string {
+	return configData.HTTPSchema
+}
+
+func GetWSSchema() string {
+	return configData.WSSchema
 }
 
 func GetBaseURL() string {
@@ -58,9 +65,13 @@ func GetBaseURL() string {
 }
 
 func GetFullBaseURL() string {
-	return configData.Schema + "://" + configData.BaseURL
+	return configData.HTTPSchema + "://" + configData.BaseURL
 }
 
 func GetTitle() string {
 	return configData.Title
+}
+
+func GetDBHost() string {
+	return configData.DBHost
 }
